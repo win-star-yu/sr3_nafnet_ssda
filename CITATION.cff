@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 title: "SR3-NAFNet-SSDA for Rice Seed 8x Super-Resolution"
-version: "1.0.0"
+version: "1.0.1"
 type: software
 license: MIT
 message: "If you use this software, please cite the archived software record and the associated dataset."
