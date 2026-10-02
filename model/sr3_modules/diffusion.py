@@ -69,7 +69,9 @@ class GaussianDiffusion(nn.Module):
         channels=3,
         loss_type='l1',
         conditional=True,
-        schedule_opt=None
+        schedule_opt=None,
+        ddim_steps=100,
+        ddim_eta=1.0
     ):
         super().__init__()
         self.channels = channels
@@ -77,6 +79,8 @@ class GaussianDiffusion(nn.Module):
         self.denoise_fn = denoise_fn
         self.loss_type = loss_type
         self.conditional = conditional
+        self.ddim_steps = int(ddim_steps)
+        self.ddim_eta = float(ddim_eta)
         if schedule_opt is not None:
             pass
             # self.set_new_noise_schedule(schedule_opt)
@@ -234,14 +238,14 @@ class GaussianDiffusion(nn.Module):
                 [self.sqrt_alphas_cumprod_prev[cur_t]]).repeat(batchsize, 1).to(device)
 
             eps = self.denoise_fn(torch.cat([condition_x, x], dim=1), noise_level)
-            var = eta * (1 - ab_prev) / (1 - ab_cur) * (1 - ab_cur / ab_prev)
+            var = eta ** 2 * (1 - ab_prev) / (1 - ab_cur) * (1 - ab_cur / ab_prev)
 
             noise = torch.randn_like(x_in)
             first_term = (ab_prev / ab_cur) ** 0.5 * x
             second_term = ((1 - ab_prev - var) ** 0.5 -
                            (ab_prev * (1 - ab_cur) / ab_cur) ** 0.5) * eps
 
-            third_term = (1 - ab_cur / ab_prev) ** 0.5 * noise
+            third_term = var.clamp_min(0).sqrt() * noise
 
             x = first_term + second_term + third_term
             ret_img = torch.cat([ret_img, x], dim=0)
@@ -263,7 +267,8 @@ class GaussianDiffusion(nn.Module):
 
     @torch.no_grad()
     def ddim_super_resolution(self, x_in, continous=False):
-        return self.ddim_p_sample_loop(x_in, continous)
+        return self.ddim_p_sample_loop(
+            x_in, continous, ddim_step=self.ddim_steps, eta=self.ddim_eta)
 
     def q_sample(self, x_start, continuous_sqrt_alpha_cumprod, noise=None):
         noise = default(noise, lambda: torch.randn_like(x_start))

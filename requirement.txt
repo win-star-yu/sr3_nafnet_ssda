@@ -1,8 +1,0 @@
-numpy
-pandas
-tqdm
-lmdb
-opencv-python
-pillow
-tensorboardx
-

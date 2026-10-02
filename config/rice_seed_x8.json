@@ -1,0 +1,86 @@
+{
+  "name": "rice_seed_x8",
+  "phase": "train",
+  "gpu_ids": [0],
+  "path": {
+    "experiments_root": "experiments",
+    "log": "logs",
+    "tb_logger": "tb_logger",
+    "results": "results",
+    "checkpoint": "checkpoint",
+    "resume_state": null
+  },
+  "datasets": {
+    "train": {
+      "name": "RiceSeedTrain",
+      "mode": "HR",
+      "dataroot": "data/train",
+      "datatype": "img",
+      "l_resolution": 64,
+      "r_resolution": 512,
+      "batch_size": 8,
+      "num_workers": 6,
+      "use_shuffle": true,
+      "data_len": -1
+    },
+    "val": {
+      "name": "RiceSeedVal",
+      "mode": "HR",
+      "dataroot": "data/val",
+      "datatype": "img",
+      "l_resolution": 64,
+      "r_resolution": 512,
+      "batch_size": 1,
+      "num_workers": 0,
+      "use_shuffle": false,
+      "data_len": -1
+    }
+  },
+  "model": {
+    "which_model_G": "sr3",
+    "finetune_norm": false,
+    "unet": {
+      "in_channel": 6,
+      "out_channel": 3,
+      "inner_channel": 64,
+      "norm_groups": 16,
+      "channel_multiplier": [1, 2, 4, 8, 16],
+      "attn_res": [],
+      "res_blocks": 1,
+      "dropout": 0.0
+    },
+    "beta_schedule": {
+      "train": {
+        "schedule": "linear",
+        "n_timestep": 2000,
+        "linear_start": 0.000001,
+        "linear_end": 0.01
+      },
+      "val": {
+        "schedule": "linear",
+        "n_timestep": 2000,
+        "linear_start": 0.000001,
+        "linear_end": 0.01
+      }
+    },
+    "diffusion": {
+      "image_size": 512,
+      "channels": 3,
+      "conditional": true,
+      "loss_type": "l1",
+      "ddim_steps": 25,
+      "ddim_eta": 0.0
+    }
+  },
+  "train": {
+    "n_iter": 300000,
+    "val_freq": 10000,
+    "save_checkpoint_freq": 10000,
+    "print_freq": 50,
+    "manual_seed": 3407,
+    "optimizer": {
+      "type": "adam",
+      "lr": 0.00001
+    }
+  }
+}

@@ -34,11 +34,14 @@ def parse(args):
     # set log directory
     if args.debug:
         opt['name'] = 'debug_{}'.format(opt['name'])
+    output_root = opt['path'].get('experiments_root', 'experiments')
+    if not os.path.isabs(output_root):
+        output_root = os.path.abspath(output_root)
     experiments_root = os.path.join(
-        '/data/experiments', '{}_{}'.format(opt['name'], get_timestamp()))
+        output_root, '{}_{}'.format(opt['name'], get_timestamp()))
     opt['path']['experiments_root'] = experiments_root
     for key, path in opt['path'].items():
-        if 'resume' not in key and 'experiments' not in key:
+        if 'resume' not in key and key != 'experiments_root':
             opt['path'][key] = os.path.join(experiments_root, path)
             mkdirs(opt['path'][key])
 
@@ -53,7 +56,7 @@ def parse(args):
         gpu_list = ','.join(str(x) for x in opt['gpu_ids'])
     os.environ['CUDA_VISIBLE_DEVICES'] = gpu_list
     print('export CUDA_VISIBLE_DEVICES=' + gpu_list)
-    if len(gpu_list) > 1:
+    if len(opt['gpu_ids']) > 1:
         opt['distributed'] = True
     else:
         opt['distributed'] = False
@@ -67,10 +70,6 @@ def parse(args):
         opt['model']['beta_schedule']['train']['n_timestep'] = 10
         opt['model']['beta_schedule']['val']['n_timestep'] = 10
         opt['datasets']['train']['data_len'] = 6
-        opt['datasets']['val']['data_len'] = 3
-
-    # validation in train phase
-    if phase == 'train':
         opt['datasets']['val']['data_len'] = 3
 
     # W&B Logging

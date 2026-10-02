@@ -107,7 +107,9 @@ def define_G(opt):
         channels=model_opt['diffusion']['channels'],
         loss_type='l1',    # L1 or L2
         conditional=model_opt['diffusion']['conditional'],
-        schedule_opt=model_opt['beta_schedule']['train']
+        schedule_opt=model_opt['beta_schedule']['train'],
+        ddim_steps=model_opt['diffusion'].get('ddim_steps', 100),
+        ddim_eta=model_opt['diffusion'].get('ddim_eta', 1.0)
     )
     if opt['phase'] == 'train':
         # init_weights(netG, init_type='kaiming', scale=0.1)
