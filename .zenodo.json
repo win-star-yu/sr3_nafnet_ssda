@@ -1,0 +1,17 @@
+{
+  "title": "SR3-NAFNet-SSDA for Rice Seed 8x Super-Resolution",
+  "upload_type": "software",
+  "description": "Reproducible implementation of the SR3-NAFNet-SSDA rice-seed super-resolution model, including the training configuration, inference code, and evaluation setup used with the associated dataset.",
+  "creators": [
+    {"name": "Li, Dail", "affiliation": "Shanghai Normal University"},
+    {"name": "Zhou, Xingyu", "affiliation": "Shanghai Normal University"},
+    {"name": "Zhao, Jinfeng", "affiliation": "Southwest Petroleum University"},
+    {"name": "Yang, Jie", "affiliation": "The University of Sydney"},
+    {"name": "Ma, Yan", "affiliation": "Shanghai Normal University"}
+  ],
+  "keywords": ["super-resolution", "diffusion model", "rice seed", "NAFNet", "SSDA"],
+  "license": "MIT",
+  "version": "1.0.0",
+  "language": "eng",
+  "access_right": "open"
+}

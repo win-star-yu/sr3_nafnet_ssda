@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+title: "SR3-NAFNet-SSDA for Rice Seed 8x Super-Resolution"
+version: "1.0.0"
+type: software
+license: MIT
+message: "If you use this software, please cite the archived software record and the associated dataset."
+authors:
+  - given-names: Dail
+    family-names: Li
+    affiliation: Shanghai Normal University
+  - given-names: Xingyu
+    family-names: Zhou
+    affiliation: Shanghai Normal University
+  - given-names: Jinfeng
+    family-names: Zhao
+    affiliation: Southwest Petroleum University
+  - given-names: Jie
+    family-names: Yang
+    affiliation: The University of Sydney
+  - given-names: Yan
+    family-names: Ma
+    affiliation: Shanghai Normal University
+keywords:
+  - super-resolution
+  - diffusion model
+  - rice seed
+  - NAFNet
+  - SSDA
+repository-code: "https://github.com/win-star-yu/sr3_nafnet_ssda"
