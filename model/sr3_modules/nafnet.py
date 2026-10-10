@@ -14,10 +14,9 @@ class SimpleGate(nn.Module):
 class SSDA(nn.Module):
     """
     Simple Spatial Decomposition Attention (SSDA)
-    基于 SimpleGate 的乘法门控思想，使用 1x3 和 3x1 分解卷积进行轻量级空间注意力。
     """
 
-    def __init__(self, c, kernel_size=3):
+    def __init__(self, c, kernel_size=7):
         super().__init__()
         assert kernel_size % 2 == 1, "Kernel size must be odd"
         padding = kernel_size // 2
@@ -62,7 +61,7 @@ class NAFBlock(nn.Module):
 
         # SimpleGate
         self.sg = SimpleGate()
-        self.ssda = SSDA(c = dw_channel // 2)
+        self.ssda = SSDA(c = dw_channel // 2, kernel_size=7)
         ffn_channel = FFN_Expand * c
         self.conv4 = nn.Conv2d(in_channels=c, out_channels=ffn_channel, kernel_size=1, padding=0, stride=1, groups=1,
                                bias=True)
