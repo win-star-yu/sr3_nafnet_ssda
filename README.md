@@ -2,6 +2,8 @@
 
 This repository contains the implementation of the proposed conditional diffusion model for 8x rice-seed microscopy super-resolution. The restoration backbone combines SR3-style diffusion, NAFNet blocks, and simple spatial decomposition attention (SSDA).
 
+The released implementation uses an SSDA spatial kernel size of `k=7`, implemented as depth-wise `1x7` and `7x1` convolutions in `model/sr3_modules/nafnet.py`.
+
 ## Data
 
 The paired dataset and its fixed train/validation/test split are available from Zenodo: [Rice Seed 8x Super-Resolution Dataset with Calibrated Smartphone Degradation](https://doi.org/10.5281/zenodo.23085080).
