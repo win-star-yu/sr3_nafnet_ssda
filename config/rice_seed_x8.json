@@ -1,5 +1,5 @@
 {
-  "name": "rice_seed_x8_k7",
+  "name": "rice_seed_x8",
   "phase": "train",
   "gpu_ids": [0],
   "path": {
@@ -13,27 +13,27 @@
   "datasets": {
     "train": {
       "name": "RiceSeedTrain",
-      "mode": "LRHR",
-      "dataroot": "/data/mycontrast/rice_dataset_phone_wide10x_color_aligned_x8_20260908_830recalibrated/train",
+      "mode": "HR",
+      "dataroot": "data/train",
       "datatype": "img",
       "l_resolution": 64,
       "r_resolution": 512,
-      "batch_size": 4,
-      "num_workers": 8,
+      "batch_size": 8,
+      "num_workers": 6,
       "use_shuffle": true,
       "data_len": -1
     },
     "val": {
       "name": "RiceSeedVal",
-      "mode": "LRHR",
-      "dataroot": "/data/mycontrast/rice_dataset_phone_wide10x_color_aligned_x8_20260908_830recalibrated/val",
+      "mode": "HR",
+      "dataroot": "data/val",
       "datatype": "img",
       "l_resolution": 64,
       "r_resolution": 512,
       "batch_size": 1,
-      "num_workers": 4,
+      "num_workers": 0,
       "use_shuffle": false,
-      "data_len": 64
+      "data_len": -1
     }
   },
   "model": {
@@ -49,14 +49,6 @@
       "res_blocks": 1,
       "dropout": 0.0
     },
-    "diffusion": {
-      "image_size": 512,
-      "channels": 3,
-      "conditional": true,
-      "loss_type": "l1",
-      "ddim_steps": 25,
-      "ddim_eta": 0.0
-    },
     "beta_schedule": {
       "train": {
         "schedule": "linear",
@@ -70,12 +62,20 @@
         "linear_start": 0.000001,
         "linear_end": 0.01
       }
+    },
+    "diffusion": {
+      "image_size": 512,
+      "channels": 3,
+      "conditional": true,
+      "loss_type": "l1",
+      "ddim_steps": 25,
+      "ddim_eta": 0.0
     }
   },
   "train": {
-    "n_iter": 120000,
+    "n_iter": 300000,
     "val_freq": 10000,
-    "save_checkpoint_freq": 5000,
+    "save_checkpoint_freq": 10000,
     "print_freq": 50,
     "manual_seed": 3407,
     "optimizer": {
