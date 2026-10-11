@@ -1,20 +1,85 @@
-# SR3-NAFNet-SSDA for Rice Seed 8x Super-Resolution
+RiceSeed-Mic: Data, Code and Study Protocol
 
-This repository contains the runnable implementation of SR3-NAFNet-SSDA and a portable rice-seed configuration.
+1. Public records and licences
 
-The accompanying dataset and measurement tables are described in [README.txt](README.txt). Install dependencies and run:
+Dataset: https://doi.org/10.5281/zenodo.23085080
+Development repository: https://github.com/win-star-yu/sr3_nafnet_ssda
 
-```bash
-python -m pip install -r requirements.txt
-python sr.py -c config/rice_phone_x8.json -p train -gpu 0
-```
+The dataset is licensed under CC BY 4.0. The code is licensed under MIT.
+The Zenodo code record associated with the current GitHub release is the
+archived code record to cite for this implementation.
 
-For evaluation, set `path.resume_state` to a checkpoint prefix without the `_gen.pth` suffix, set `datasets.val.dataroot` to the desired split, then run:
+2. Dataset files and reconstruction
 
-```bash
-python sr.py -c config/rice_phone_x8.json -p val -gpu 0
-```
+The dataset archive is distributed as 79 parts named
+seed_dataset.tar.gz.part.000 through seed_dataset.tar.gz.part.078, together
+with SHA256SUMS.txt, REASSEMBLE.txt, LICENSE.txt and this documentation.
+Download all parts to one directory. On Linux/macOS:
 
-The configuration uses relative dataset locations: `data/train` and `data/val`. Each split must contain `hr_512`, `lr_64`, and `sr_64_512` with matching filenames. SSDA uses depthwise directional kernels of size 1x7 and 7x1.
+    sha256sum -c SHA256SUMS.txt
+    cat seed_dataset.tar.gz.part.[0-9][0-9][0-9] > seed_dataset.tar.gz
+    tar -xzf seed_dataset.tar.gz
 
-The code is released under the MIT License.
+On Windows Command Prompt:
+
+    copy /b seed_dataset.tar.gz.part.* seed_dataset.tar.gz
+    tar -xzf seed_dataset.tar.gz
+
+Dataset layout:
+
+    seed_dataset/
+        train/hr_512/    train/lr_64/    train/sr_64_512/
+        val/hr_512/      val/lr_64/      val/sr_64_512/
+        test/hr_512/     test/lr_64/     test/sr_64_512/
+
+Matching filenames identify an HR/LR pair. HR patches are 512 x 512 pixels
+and LR patches are 64 x 64 pixels. The train, validation and test subsets
+contain 16,808, 2,129 and 2,145 pairs, respectively. Source images were
+assigned to a subset before patch extraction.
+
+The controlled degradation includes Gaussian low-pass filtering, continuous
+colour-response mapping, constrained luminance sharpening, JPEG
+encoding/decoding, eightfold area downsampling and residual intensity
+perturbation. The main parameters are HR Gaussian sigma = 6 pixels;
+sharpening Gaussian sigma = 3.2 pixels and strength = 0.5; JPEG quality =
+95; and final-LR read-noise SD = 0.20 with a signal-dependent coefficient
+of 0.25 on the 8-bit intensity scale.
+
+3. Hair-length measurement tables
+
+Hair_Length_Measurements_Per_Hair.csv contains 60 per-hair averages from
+three observers for 20 physical seeds, each with three hairs. Lengths are
+in micrometres. Hair_Length_Measurement_Summary.csv reports method-level
+MAE, MRE, RMSE, bias, limits of agreement and confidence intervals.
+
+4. Code files and commands
+
+The single entry point is sr.py. The portable configuration is
+config/rice_phone_x8.json. Before use, set datasets.train.dataroot and
+datasets.val.dataroot to the selected dataset split directories. Each split
+requires hr_512/, lr_64/ and sr_64_512/; the latter contains bicubic
+upsampling of the matching LR images.
+
+Install and train:
+
+    python -m pip install -r requirements.txt
+    python sr.py -c config/rice_phone_x8.json -p train -gpu 0
+
+For evaluation, set path.resume_state to the checkpoint prefix without the
+_gen.pth suffix, set datasets.val.dataroot to the desired validation or test
+split, and run:
+
+    python sr.py -c config/rice_phone_x8.json -p val -gpu 0
+
+SSDA is implemented in model/sr3_modules/nafnet.py and uses depthwise 1x7
+and 7x1 directional convolutions. Diffusion and DDIM are implemented in
+model/sr3_modules/diffusion.py. Image loading is implemented in
+data/LRHR_dataset.py.
+
+5. Evaluation conventions
+
+For the synthetic test set, PSNR and SSIM use the reported image-region
+conventions. Perceptual metrics and foreground-region measurements follow
+the corresponding manuscript and supplementary-information definitions.
+Use the supplied LR images for evaluation rather than regenerating a
+different degradation.
