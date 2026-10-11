@@ -13,7 +13,7 @@ def create_dataloader(dataset, dataset_opt, phase):
             shuffle=dataset_opt['use_shuffle'],
             num_workers=dataset_opt['num_workers'],
             pin_memory=True)
-    elif phase == 'val':
+    elif phase in ('val', 'test'):
         return torch.utils.data.DataLoader(
             dataset, batch_size=1, shuffle=False, num_workers=0, pin_memory=True)
     else:

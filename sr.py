@@ -14,8 +14,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--config', type=str, default='config/rice_phone_x8.json',
                         help='JSON file for configuration')
-    parser.add_argument('-p', '--phase', type=str, choices=['train', 'val'],
-                        help='Run either train(training) or val(generation)', default='train')
+    parser.add_argument('-p', '--phase', type=str, choices=['train', 'val', 'test'],
+                        help='Run train, val, or test', default='train')
     parser.add_argument('-gpu', '--gpu_ids', type=str, default=None)
     parser.add_argument('-debug', '-d', action='store_true')
     parser.add_argument('-enable_wandb', action='store_true')
@@ -52,14 +52,23 @@ if __name__ == "__main__":
 
     # dataset
     for phase, dataset_opt in opt['datasets'].items():
-        if phase == 'train' and args.phase != 'val':
+        if phase == 'train' and args.phase == 'train':
             train_set = Data.create_dataset(dataset_opt, phase)
             train_loader = Data.create_dataloader(
                 train_set, dataset_opt, phase)
-        elif phase == 'val':
+        elif phase == 'val' and args.phase in ('train', 'val'):
             val_set = Data.create_dataset(dataset_opt, phase)
             val_loader = Data.create_dataloader(
                 val_set, dataset_opt, phase)
+        elif phase == 'test' and args.phase == 'test':
+            test_set = Data.create_dataset(dataset_opt, phase)
+            expected_length = dataset_opt.get('expected_length', None)
+            if expected_length is not None and len(test_set) != expected_length:
+                raise RuntimeError(
+                    'Expected {} test images, but found {}.'.format(
+                        expected_length, len(test_set)))
+            test_loader = Data.create_dataloader(
+                test_set, dataset_opt, phase)
     logger.info('Initial Dataset Finished')
 
     # model
@@ -133,8 +142,10 @@ if __name__ == "__main__":
                             np.transpose(np.concatenate(
                                 (fake_img, sr_img, hr_img), axis=1), [2, 0, 1]),
                             idx)
+                        border = opt.get('evaluation', {}).get('crop_border', 0)
                         avg_psnr += Metrics.calculate_psnr(
-                            sr_img, hr_img)
+                            Metrics.crop_border(sr_img, border),
+                            Metrics.crop_border(hr_img, border))
 
                         if wandb_logger:
                             wandb_logger.log_image(
@@ -179,7 +190,9 @@ if __name__ == "__main__":
         idx = 0
         result_path = '{}'.format(opt['path']['results'])
         os.makedirs(result_path, exist_ok=True)
-        for _,  val_data in enumerate(val_loader):
+        eval_loader = test_loader if args.phase == 'test' else val_loader
+        border = opt.get('evaluation', {}).get('crop_border', 0)
+        for _,  val_data in enumerate(eval_loader):
             idx += 1
             diffusion.feed_data(val_data)
             # diffusion.test(continous=True)
@@ -214,8 +227,10 @@ if __name__ == "__main__":
                 fake_img, '{}/{}_{}_inf.png'.format(result_path, current_step, idx))
 
             # generation
-            eval_psnr = Metrics.calculate_psnr(Metrics.tensor2img(visuals['SR'][-1]), hr_img)
-            eval_ssim = Metrics.calculate_ssim(Metrics.tensor2img(visuals['SR'][-1]), hr_img)
+            sr_eval = Metrics.crop_border(Metrics.tensor2img(visuals['SR'][-1]), border)
+            hr_eval = Metrics.crop_border(hr_img, border)
+            eval_psnr = Metrics.calculate_psnr(sr_eval, hr_eval)
+            eval_ssim = Metrics.calculate_ssim(sr_eval, hr_eval)
 
             avg_psnr += eval_psnr
             avg_ssim += eval_ssim

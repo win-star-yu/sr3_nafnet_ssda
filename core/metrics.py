@@ -85,9 +85,19 @@ def calculate_ssim(img1, img2):
         if img1.shape[2] == 3:
             ssims = []
             for i in range(3):
-                ssims.append(ssim(img1, img2))
+                ssims.append(ssim(img1[:, :, i], img2[:, :, i]))
             return np.array(ssims).mean()
         elif img1.shape[2] == 1:
             return ssim(np.squeeze(img1), np.squeeze(img2))
     else:
         raise ValueError('Wrong input image dimensions.')
+
+
+def crop_border(img, border):
+    if border < 0:
+        raise ValueError('border must be non-negative.')
+    if border == 0:
+        return img
+    if img.shape[0] <= 2 * border or img.shape[1] <= 2 * border:
+        raise ValueError('border is too large for the image size.')
+    return img[border:-border, border:-border, ...]

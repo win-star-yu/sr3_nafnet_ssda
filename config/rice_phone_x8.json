@@ -34,7 +34,24 @@
       "num_workers": 4,
       "use_shuffle": false,
       "data_len": 64
+    },
+    "test": {
+      "name": "RiceSeedTest",
+      "mode": "LRHR",
+      "dataroot": "data/test",
+      "datatype": "img",
+      "l_resolution": 64,
+      "r_resolution": 512,
+      "batch_size": 1,
+      "num_workers": 4,
+      "use_shuffle": false,
+      "data_len": 2145,
+      "expected_length": 2145
     }
+  },
+  "evaluation": {
+    "crop_border": 0,
+    "color_space": "rgb"
   },
   "model": {
     "which_model_G": "sr3",

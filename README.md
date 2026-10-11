@@ -71,6 +71,17 @@ split, and run:
 
     python sr.py -c config/rice_phone_x8.json -p val -gpu 0
 
+For the final reported test, set path.resume_state, keep
+datasets.test.dataroot at the test split, and run:
+
+    python sr.py -c config/rice_phone_x8.json -p test -gpu 0
+
+The supplied test configuration requires exactly 2,145 image pairs and stops
+with an error if the test split is incomplete. Metrics are computed in RGB
+with evaluation.crop_border = 0, i.e. on the full image without an x8 border
+crop. SSIM uses an 11 x 11 Gaussian window with sigma = 1.5; its internal
+valid-window operation excludes only the five-pixel convolution margin.
+
 SSDA is implemented in model/sr3_modules/nafnet.py and uses depthwise 1x7
 and 7x1 directional convolutions. Diffusion and DDIM are implemented in
 model/sr3_modules/diffusion.py. Image loading is implemented in
