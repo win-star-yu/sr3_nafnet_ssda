@@ -69,14 +69,23 @@ class DDPM(BaseModel):
         self.netG.train()
 
     def ddim_test(self, continous=False):
+        seed_base = self.opt['model']['diffusion'].get('ddim_seed_base', None)
+        seed = None
+        if seed_base is not None and 'Index' in self.data:
+            index = self.data['Index']
+            if torch.is_tensor(index):
+                index = index.detach().cpu().view(-1).tolist()
+            elif not isinstance(index, (list, tuple)):
+                index = [index]
+            seed = [int(seed_base) + int(item) for item in index]
         self.netG.eval()
         with torch.no_grad():
             if isinstance(self.netG, nn.DataParallel):
-                self.SR = self.netG.module.super_resolution(
-                    self.data['SR'], continous)
+                self.SR = self.netG.module.ddim_super_resolution(
+                    self.data['SR'], continous, seed=seed)
             else:
                 self.SR = self.netG.ddim_super_resolution(
-                    self.data['SR'], continous)
+                    self.data['SR'], continous, seed=seed)
         self.netG.train()
 
     def sample(self, batch_size=1, continous=False):

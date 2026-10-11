@@ -12,7 +12,7 @@ import numpy as np
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('-c', '--config', type=str, default='config/rice_seed_x8.json',
+    parser.add_argument('-c', '--config', type=str, default='config/rice_phone_x8.json',
                         help='JSON file for configuration')
     parser.add_argument('-p', '--phase', type=str, choices=['train', 'val'],
                         help='Run either train(training) or val(generation)', default='train')
@@ -112,8 +112,7 @@ if __name__ == "__main__":
                     for _,  val_data in enumerate(val_loader):
                         idx += 1
                         diffusion.feed_data(val_data)
-                        diffusion.test(continous=False)
-                        # diffusion.ddim_test(continous=False)
+                        diffusion.ddim_test(continous=False)
                         visuals = diffusion.get_current_visuals()
                         sr_img = Metrics.tensor2img(visuals['SR'])  # uint8
                         hr_img = Metrics.tensor2img(visuals['HR'])  # uint8

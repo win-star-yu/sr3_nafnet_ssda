@@ -18,7 +18,7 @@
       "datatype": "img",
       "l_resolution": 64,
       "r_resolution": 512,
-      "batch_size": 4,
+      "batch_size": 2,
       "num_workers": 8,
       "use_shuffle": true,
       "data_len": -1
@@ -55,32 +55,35 @@
       "conditional": true,
       "loss_type": "l1",
       "ddim_steps": 25,
-      "ddim_eta": 0.0
+      "ddim_eta": 0.0,
+      "ddim_base_t": 110,
+      "ddim_strength": 0.28,
+      "ddim_seed_base": 4407
     },
     "beta_schedule": {
       "train": {
         "schedule": "linear",
         "n_timestep": 2000,
-        "linear_start": 0.000001,
-        "linear_end": 0.01
+        "linear_start": 0.0001,
+        "linear_end": 0.02
       },
       "val": {
         "schedule": "linear",
         "n_timestep": 2000,
-        "linear_start": 0.000001,
-        "linear_end": 0.01
+        "linear_start": 0.0001,
+        "linear_end": 0.02
       }
     }
   },
   "train": {
-    "n_iter": 120000,
+    "n_iter": 340000,
     "val_freq": 10000,
     "save_checkpoint_freq": 5000,
     "print_freq": 50,
     "manual_seed": 3407,
     "optimizer": {
       "type": "adam",
-      "lr": 0.00001
+      "lr": 0.00002
     }
   }
 }

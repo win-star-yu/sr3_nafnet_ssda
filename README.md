@@ -76,6 +76,15 @@ and 7x1 directional convolutions. Diffusion and DDIM are implemented in
 model/sr3_modules/diffusion.py. Image loading is implemented in
 data/LRHR_dataset.py.
 
+The supplied configuration reproduces the manuscript settings: a linear
+2,000-step beta schedule from 0.0001 to 0.02, 340,000 training iterations,
+batch size 2, and Adam learning rate 0.00002. Evaluation uses DDIM with 25
+network evaluations and eta = 0. The initial state is formed by perturbing
+the bicubic LR condition at round(110 x 0.28) = 31; for image index i, the
+initial Gaussian noise uses the local seed 4407 + i. Consequently, the
+default 25-step trajectory is 31, 30, 29, 27, 26, 25, 24, 22, 21, 20, 19,
+17, 16, 15, 14, 12, 11, 10, 9, 7, 6, 5, 4, 2, 1, 0.
+
 5. Evaluation conventions
 
 For the synthetic test set, PSNR and SSIM use the reported image-region

@@ -71,7 +71,9 @@ class GaussianDiffusion(nn.Module):
         conditional=True,
         schedule_opt=None,
         ddim_steps=100,
-        ddim_eta=1.0
+        ddim_eta=1.0,
+        ddim_base_t=None,
+        ddim_strength=1.0
     ):
         super().__init__()
         self.channels = channels
@@ -81,6 +83,8 @@ class GaussianDiffusion(nn.Module):
         self.conditional = conditional
         self.ddim_steps = int(ddim_steps)
         self.ddim_eta = float(ddim_eta)
+        self.ddim_base_t = None if ddim_base_t is None else int(ddim_base_t)
+        self.ddim_strength = float(ddim_strength)
         if schedule_opt is not None:
             pass
             # self.set_new_noise_schedule(schedule_opt)
@@ -204,30 +208,53 @@ class GaussianDiffusion(nn.Module):
             return ret_img[-1]
 
     def get_ts(self, ddim_step, ddpm_step):
-        sequence = torch.arange(0, ddpm_step + 1)
-        output_length = ddim_step
-        log_space_indices = np.unique(
-            np.logspace(np.log10(len(sequence) - 1), 0, num=output_length + 1, base=10.0, dtype=int))
-        unevenly_downsampled_sequence = sequence[log_space_indices]
-        reversed_sequence = torch.cat([unevenly_downsampled_sequence.flip(0), torch.tensor([0])])
-        print(reversed_sequence)
-        return reversed_sequence
+        if ddim_step < 1:
+            raise ValueError('ddim_step must be positive.')
+        if ddpm_step < 1:
+            raise ValueError('ddpm_step must be positive.')
+        nodes = np.rint(np.linspace(ddpm_step, 0, ddim_step + 1)).astype(np.int64)
+        nodes[0] = ddpm_step
+        nodes[-1] = 0
+        return torch.from_numpy(nodes)
+
+    def _sample_noise(self, x, seed=None):
+        if seed is None:
+            return torch.randn_like(x)
+        if not isinstance(seed, (list, tuple)):
+            seed = [seed] * x.shape[0]
+        if len(seed) != x.shape[0]:
+            raise ValueError('The number of DDIM seeds must equal the batch size.')
+        noise = []
+        for item in seed:
+            generator = torch.Generator(device=x.device)
+            generator.manual_seed(int(item))
+            noise.append(torch.randn((1, *x.shape[1:]), device=x.device,
+                                     dtype=x.dtype, generator=generator))
+        return torch.cat(noise, dim=0)
 
     @torch.no_grad()
-    def ddim_p_sample_loop(self, x_in, continous=False, ddim_step=100, eta=1):
+    def ddim_p_sample_loop(self, x_in, continous=False, ddim_step=100, eta=1,
+                           base_t=None, strength=1.0, seed=None):
 
         device = self.betas.device
         batchsize = x_in.shape[0]
-        ts = self.get_ts(ddim_step, self.num_timesteps)
+        if base_t is None:
+            start_t = self.num_timesteps
+        else:
+            start_t = int(round(float(base_t) * float(strength)))
+            start_t = max(1, min(start_t, self.num_timesteps))
+        ts = self.get_ts(ddim_step, start_t)
         ddim_step = ts.shape[0]
         # ts = torch.linspace(self.num_timesteps, 0,
         #                     (ddim_step + 1)).to(device).to(torch.long)
         condition_x = x_in
         shape = x_in.shape
-        x = torch.randn(shape, device=device)
-        ret_img = x_in
+        init_noise = self._sample_noise(x_in, seed=seed)
+        alpha_start = self.alphas_cumprod[start_t - 1]
+        x = alpha_start.sqrt() * condition_x + (1 - alpha_start).sqrt() * init_noise
+        ret_img = x
         for i in tqdm((range(1, ddim_step)), desc='sampling loop time step',
-                      total=ddim_step):
+                      total=ddim_step - 1):
             cur_t = ts[i - 1] - 1
             prev_t = ts[i] - 1
 
@@ -240,7 +267,7 @@ class GaussianDiffusion(nn.Module):
             eps = self.denoise_fn(torch.cat([condition_x, x], dim=1), noise_level)
             var = eta ** 2 * (1 - ab_prev) / (1 - ab_cur) * (1 - ab_cur / ab_prev)
 
-            noise = torch.randn_like(x_in)
+            noise = torch.randn_like(x_in) if eta > 0 else torch.zeros_like(x_in)
             first_term = (ab_prev / ab_cur) ** 0.5 * x
             second_term = ((1 - ab_prev - var) ** 0.5 -
                            (ab_prev * (1 - ab_cur) / ab_cur) ** 0.5) * eps
@@ -266,9 +293,10 @@ class GaussianDiffusion(nn.Module):
         return self.p_sample_loop(x_in, continous)
 
     @torch.no_grad()
-    def ddim_super_resolution(self, x_in, continous=False):
+    def ddim_super_resolution(self, x_in, continous=False, seed=None):
         return self.ddim_p_sample_loop(
-            x_in, continous, ddim_step=self.ddim_steps, eta=self.ddim_eta)
+            x_in, continous, ddim_step=self.ddim_steps, eta=self.ddim_eta,
+            base_t=self.ddim_base_t, strength=self.ddim_strength, seed=seed)
 
     def q_sample(self, x_start, continuous_sqrt_alpha_cumprod, noise=None):
         noise = default(noise, lambda: torch.randn_like(x_start))

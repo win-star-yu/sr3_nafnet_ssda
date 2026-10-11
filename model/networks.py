@@ -109,7 +109,9 @@ def define_G(opt):
         conditional=model_opt['diffusion']['conditional'],
         schedule_opt=model_opt['beta_schedule']['train'],
         ddim_steps=model_opt['diffusion'].get('ddim_steps', 100),
-        ddim_eta=model_opt['diffusion'].get('ddim_eta', 1.0)
+        ddim_eta=model_opt['diffusion'].get('ddim_eta', 1.0),
+        ddim_base_t=model_opt['diffusion'].get('ddim_base_t', None),
+        ddim_strength=model_opt['diffusion'].get('ddim_strength', 1.0)
     )
     if opt['phase'] == 'train':
         # init_weights(netG, init_type='kaiming', scale=0.1)
