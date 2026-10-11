@@ -9,6 +9,8 @@ The dataset is licensed under CC BY 4.0. The code is licensed under MIT.
 The Zenodo code record associated with the current GitHub release is the
 archived code record to cite for this implementation.
 
+Pretrained checkpoint: [Baidu Netdisk](https://pan.baidu.com/s/1UrTIDZBo4jWlxIMyIEk7bQ?pwd=wec2) (code: `wec2`).
+
 2. Dataset files and reconstruction
 
 The dataset archive is distributed as 79 parts named

@@ -33,7 +33,7 @@
       "batch_size": 1,
       "num_workers": 4,
       "use_shuffle": false,
-      "data_len": 64
+      "data_len": -1
     },
     "test": {
       "name": "RiceSeedTest",
