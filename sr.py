@@ -84,8 +84,9 @@ if __name__ == "__main__":
         logger.info('Resuming training from epoch: {}, iter: {}.'.format(
             current_epoch, current_step))
 
+    schedule_phase = 'val' if opt['phase'] == 'test' else opt['phase']
     diffusion.set_new_noise_schedule(
-        opt['model']['beta_schedule'][opt['phase']], schedule_phase=opt['phase'])
+        opt['model']['beta_schedule'][schedule_phase], schedule_phase=schedule_phase)
     if opt['phase'] == 'train':
         while current_step < n_iter:
             current_epoch += 1
