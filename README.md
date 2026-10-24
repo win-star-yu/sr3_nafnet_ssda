@@ -9,7 +9,7 @@ The dataset is licensed under CC BY 4.0. The code is licensed under MIT.
 The Zenodo code record associated with the current GitHub release is the
 archived code record to cite for this implementation.
 
-Pretrained checkpoint: [Baidu Netdisk](https://pan.baidu.com/s/1UrTIDZBo4jWlxIMyIEk7bQ?pwd=wec2) (code: `wec2`).
+Pretrained checkpoint: [Baidu Netdisk](https://pan.baidu.com/s/1EgG0UCHYpkNAleYd2gT2iQ?pwd=tq3j) (code: `tq3j`).
 
 2. Dataset files and reconstruction
 

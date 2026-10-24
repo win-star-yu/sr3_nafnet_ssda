@@ -1,0 +1,17 @@
+{
+  "method": "Ours",
+  "count": 2145,
+  "mean_mask_fraction": 0.6434601729241103,
+  "full_psnr_rgb": 35.47371070926471,
+  "full_psnr_rgb_std": 1.6097918557302497,
+  "full_ssim_rgb": 0.883138778923976,
+  "full_ssim_rgb_std": 0.015309519410193859,
+  "fg_psnr_rgb": 34.26091165896857,
+  "fg_psnr_rgb_std": 1.131736454208884,
+  "fg_ssim_rgb": 0.8681598707997364,
+  "fg_ssim_rgb_std": 0.010055424321356905,
+  "fg_lpips_alex": 0.15391002409681157,
+  "fg_lpips_alex_std": 0.0794944122416252,
+  "fg_dists": 0.15367928143147822,
+  "fg_dists_std": 0.037908241733796956
+}
